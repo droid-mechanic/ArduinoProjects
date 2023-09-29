@@ -1,6 +1,7 @@
 #include <TJpg_Decoder.h>
-#include <Adafruit_GFX.h>    // Core graphics library
-#include "Adafruit_ILI9341.h"
+#include <TFT_eSPI.h>
+//#include <Adafruit_GFX.h>    // Core graphics library
+//#include "Adafruit_ILI9341.h"
 #include "makerfabs_pin.h"
 #include <SPI.h>
 #include <Wire.h>
@@ -13,7 +14,9 @@ WebsocketsClient client;
 
 PCF8574 pcf8574(PCF_ADD);
 
-Adafruit_ILI9341 tft = Adafruit_ILI9341(LCD_CS, LCD_DC, LCD_MOSI, LCD_SCK, LCD_RST);
+//Adafruit_ILI9341 tft = Adafruit_ILI9341(LCD_CS, LCD_DC, LCD_MOSI, LCD_SCK, LCD_RST);
+
+TFT_eSPI tft = TFT_eSPI();         // Invoke custom library
 
 const int w = 128;     // image width in pixels
 const int h = 96;     // height
@@ -34,10 +37,10 @@ bool tft_output(int16_t x, int16_t y, uint16_t w, uint16_t h, uint16_t* bitmap)
   if ( y >= tft.height() ) return 0;
 
   // This function will clip the image block rendering automatically at the TFT boundaries
-  //tft.pushImage(x, y, w, h, bitmap);
+  tft.pushImage(x, y, w, h, bitmap);
 
   // This might work instead if you adapt the sketch to use the Adafruit_GFX library
-  tft.drawRGBBitmap(x, y, bitmap, w, h);
+  //tft.drawRGBBitmap(x, y, bitmap, w, h);
 
   // Return 1 to decode next block
   return 1;
@@ -45,29 +48,29 @@ bool tft_output(int16_t x, int16_t y, uint16_t w, uint16_t h, uint16_t* bitmap)
 
 void setup() {
   Serial.begin(115200);
-
+delay(1000);
   Serial.println("Camera Web Socket");
 
-  Wire.begin(ESP32_SDA, ESP32_SCL);
+  //Wire.begin(ESP32_SDA, ESP32_SCL);
 
-  key_init();
+  //key_init();
     
-  if (! pcf8574.begin()) {
-    Serial.println("PCF8574 not found!");
-    while (1) delay(10);
- }
+//  if (! pcf8574.begin()) {
+//    Serial.println("PCF8574 not found!");
+//    while (1) delay(10);
+// }
 
-  pinMode(LCD_CS, OUTPUT);
-  pinMode(LCD_DC, OUTPUT);
-  pinMode(LCD_BL, OUTPUT);
-  digitalWrite(LCD_BL, HIGH);
+//  pinMode(LCD_CS, OUTPUT);
+//  pinMode(LCD_DC, OUTPUT);
+//  pinMode(LCD_BL, OUTPUT);
+//  digitalWrite(LCD_BL, HIGH);
   
   tft.begin();
   tft.setRotation(1);
 
   tft.fillScreen(ILI9341_BLACK);
   tft.fillRect(0, 0, 319, 13, tft.color565(255, 0, 10));
-  //tft.setSwapBytes(true); // We need to swap the colour bytes (endianess)
+  tft.setSwapBytes(true); // We need to swap the colour bytes (endianess)
 
   // The jpeg image can be scaled by a factor of 1, 2, 4, or 8
   TJpgDec.setJpgScale(1);
